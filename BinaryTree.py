@@ -4,12 +4,30 @@ class TreeNode(object):
         self.data = d
         self.left = None
         self.right = None
+    def __repr__(self):
+        if self:
+            serial = []
+            queue = [self]
+            while queue:
+                cur = queue[0]
+                if cur:
+                    serial.append(cur.data)
+                    queue.append(cur.left)
+                    queue.append(cur.right)
+                else:
+                    serial.append("#")
+                queue = queue[1:]
+            while serial[-1] == "#":
+                serial.pop()
+            return repr(serial)
+        else:
+            return None
 
 class BinaryTree(object):
     def __init__(self, array):
         array.sort()
         self.root = self.create_binary_st_helper(array, 0, len(array)-1)
-        
+
     def create_binary_st_helper(self, array, start, end):
         mid = int((start + end) / 2)
         if mid == end:
@@ -58,7 +76,8 @@ class BinaryTree(object):
             if cur.left: stack.append(cur.left)
             print(cur.data)
             
-    def print_me(self, c_root, level = 0):
+    def print_me(self, c_root=None, level = 0):
+        if not c_root: c_root = self.root
         this_level = [c_root]
         print(c_root.data)
         while this_level:
@@ -86,6 +105,49 @@ class BinaryTree(object):
         if c_root.right:
             depth_r = self.max_depth(c_root.right) + 1
         return max(depth_l, depth_r)
+
+    def is_balanced(self):
+        result = 0
+        if self.root is not None:
+            result = self.is_balanced_helper(self.root)
+        if result == -1:
+            return False
+        return True
+  
+    def is_balanced_helper(self, c_root):
+        if c_root == None:
+            return 0
+        left = 0
+        right = 0
+        if c_root.left:
+            left = self.is_balanced_helper(c_root.left)
+        if c_root.right:
+            right = self.is_balanced_helper(c_root.right)
+        if left == -1 or right == -1:
+            return -1
+        if abs(left - right) > 1:
+            return -1
+        else:
+            return max(left + 1, right +1)
+
+    def balance(self, c_root):
+        if not c_root: return (0, None)
+        (l_depth, c_root.left) = self.balance(c_root.left)
+        (r_depth, c_root.right) = self.balance(c_root.right)
+        l_depth += 1
+        r_depth += 1
+        if l_depth - r_depth > 1:
+            new_root = c_root.left
+            c_root.left = c_root.left.right
+            new_root.right = c_root
+            return (max(r_depth + 1, l_depth - 1), new_root)
+        elif l_depth - r_depth < -1:
+            new_root = c_root.right
+            c_root.right = c_root.right.left
+            new_root.left = c_root
+            return (max(r_depth - 1, l_depth + 1), new_root)
+        else:
+            return (max(r_depth, l_depth), c_root)       
         
 if __name__=="__main__":
     tree = BinaryTree([x for x in range(31)])
